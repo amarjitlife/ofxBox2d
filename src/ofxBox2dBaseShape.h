@@ -64,6 +64,7 @@ public:
 	
 	//------------------------------------------------ 
 	virtual void setFixedRotation(bool b);
+	virtual void setType(b2BodyType type);
 	virtual void setRotationFriction(float f);
 	float getRotation();
 	void setRotation(float angle);

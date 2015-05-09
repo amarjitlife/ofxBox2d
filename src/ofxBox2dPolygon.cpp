@@ -9,13 +9,14 @@
 
 #include "ofxBox2dPolygon.h"
 #include "ofxBox2dPolygonUtils.h"
+using namespace std;
 
 //----------------------------------------
 ofxBox2dPolygon::ofxBox2dPolygon() { 
 	bIsTriangulated = false;
 	bIsSimplified   = false;
     ofPolyline::setClosed(true);
-
+    bodyDef.type = (b2BodyType)-1;
 }
 
 //----------------------------------------
@@ -100,6 +101,27 @@ void ofxBox2dPolygon::triangulatePoly(float resampleAmt, int nPointsInside) {
 		// triangulate the polyline...
 		if(nPointsInside!=-1) addRandomPointsInside(newPoly, nPointsInside);
 		triangles = triangulatePolygonWithOutline(newPoly, polyOutline);
+
+		/*cout << "simplified shape with " << polyOutline.size() << endl;
+		ofTessellator tessellator;
+		ofMesh mesh;
+		tessellator.tessellateToMesh(polyOutline,OF_POLY_WINDING_ODD,mesh,true);
+		cout << "tessellation with " << mesh.getNumIndices()/3 << endl;
+		for(auto i = 0; i<mesh.getNumIndices(); i+=3){
+			TriangleShape triangle;
+			triangle.a = mesh.getVertices()[i];
+			triangle.b = mesh.getVertices()[i+1];
+			triangle.c = mesh.getVertices()[i+2];
+			ofPolyline tri;
+			tri.addVertex(triangle.a);
+			tri.addVertex(triangle.b);
+			tri.addVertex(triangle.c);
+			tri.close();
+			if(tri.getArea()>1e-6){
+				cout << "creating tri" << endl;
+				triangles.push_back(triangle);
+			}
+		}*/
 			
 		clear();
 		if(wasClosed) ofPolyline::setClosed(wasClosed);
@@ -136,7 +158,11 @@ void ofxBox2dPolygon::create(b2World * b2dworld) {
 	
 	// create the body from the world (1)
 	b2BodyDef		bd;
-	bd.type			= density <= 0.0 ? b2_staticBody : b2_dynamicBody;
+	if(bodyDef.type==-1){
+		bd.type			= density <= 0.0 ? b2_staticBody : b2_dynamicBody;
+	}else{
+		bd.type = bodyDef.type;
+	}
 	body			= b2dworld->CreateBody(&bd);
 
 	if(bIsTriangulated) {
@@ -192,7 +218,7 @@ void ofxBox2dPolygon::create(b2World * b2dworld) {
     ofPoint center = getCentroid2D();
     for (size_t i=0; i<pts.size(); i++) {
         ofPoint p(pts[i].x, pts[i].y);
-        p -= center;
+        //p -= center;
         path.lineTo(p);
     }
     mesh = path.getTessellation();

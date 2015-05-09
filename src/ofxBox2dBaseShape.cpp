@@ -162,6 +162,11 @@ void ofxBox2dBaseShape::setFixedRotation(bool b) {
 }
 
 //------------------------------------------------ 
+void ofxBox2dBaseShape::setType(b2BodyType type) {
+	bodyDef.type = type;
+}
+
+//------------------------------------------------
 void ofxBox2dBaseShape::setRotationFriction(float f) {
 	bodyDef.angularDamping = f;
 }
